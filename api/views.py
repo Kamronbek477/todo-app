@@ -2,7 +2,10 @@ from django.views import View
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse,HttpRequest
 from .models import Task
+from django.contrib.auth.models import User
 import json
+
+from django.contrib.auth.hashers import make_password
 
 def to_dict(task: Task) -> dict:
     return {
@@ -13,6 +16,13 @@ def to_dict(task: Task) -> dict:
         "created": task.created,
         "updated": task.updated,
         "user": task.user.username,
+    }
+
+def to_dict_user(user: User) -> dict:
+    return {
+        "id": user.id,
+        "username": user.username,
+        "password": user.password,
     }
 
 
@@ -47,6 +57,7 @@ class TaskIdView(View):
             return JsonResponse({'status': 'object does not exist!'})
         task = Task.objects.get(id=id)
         return JsonResponse(to_dict(task),status=200)
+
     def put(self,request:HttpRequest,id):
         try:
             task = Task.objects.get(id=id)
@@ -56,10 +67,11 @@ class TaskIdView(View):
         data_json = request.body.decode()
         data = json.loads(data_json)
 
-        if data.get('title'):
-            task.name = data['title']
+        task.title = data.get('title', task.title)
+        # if data.get('title'):
+        #     task.title = data['title']
         if data.get('description'):
-            task.website = data['description']
+            task.description = data['description']
        
 
         task.save()
@@ -73,6 +85,7 @@ class TaskIdView(View):
             return JsonResponse({'status': 'object does not exist!'})
 
         task.delete()
+
         return JsonResponse({'status': 'ok'},status=204)
         
 class TaskDoneView(View):
@@ -101,9 +114,37 @@ class TaskUndoneView(View):
 
         task.save()
 
-
         return JsonResponse(to_dict(task),status=200)
 
+
+class UserListView(View):
+    def get(self, request: HttpRequest, id: int = None) -> JsonResponse:
+        if id:
+            try:
+                user = User.objects.get(id=id)
+            except ObjectDoesNotExist:
+                return JsonResponse({'status': 'object does not exist!'})
+            return JsonResponse(to_dict_user(user), status=200)
+        users = User.objects.all()
+        return JsonResponse([to_dict_user(user) for user in users], safe=False, status=200)
+
+    
+    def post(self, request: HttpRequest) -> JsonResponse:
+        data = request.body.decode()
+        data = json.loads(data)
+
+        if data.get('username') == None:
+            return JsonResponse({'status': 'username is required.'})
         
+        if data.get('password') == None:
+            return JsonResponse({'status': 'password is required.'})
 
+        user = User.objects.create(
+            username=data['username'],
+            password=make_password(data['password'])
+        )
+        # user.set_password(data['password'])
+        user.save()
 
+        return JsonResponse(to_dict_user(user))
+        
