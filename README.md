@@ -23,6 +23,14 @@ this is for practice django
 | created | datetime | Task created datetime |
 | updated | datetime | Task updated datetime |
 
+## Model User
+
+| Field | Type | Description |
+| --- | --- | --- |
+| id | int | Primary key |
+| username | string | User username |
+| password | string | User password |
+
 ## API
 
 | Method | Path | Description |
@@ -34,6 +42,9 @@ this is for practice django
 | DELETE | /api/v1/tasks/:id/ | Delete todo |
 | POST | /api/v1/tasks/:id/done/ | Mark todo as done |
 | POST | /api/v1/tasks/:id/undone/ | Mark todo as undone |
+| POST | /api/v1/users/ | Create user |
+| GET | /api/v1/users/ | List User |
+| GET | /api/v1/users/:id/ | Detail user |
 
 ### List todo
 
@@ -210,5 +221,81 @@ Status: 200 OK
     "done": false,
     "created": "2021-01-01T00:00:00Z",
     "updated": "2021-01-01T00:00:00Z"
+}
+```
+
+### Create user
+
+```
+POST /api/v1/users/
+```
+
+#### Request
+
+```json
+{
+    "username": "user1",
+    "password": "password1"
+}
+```
+
+#### Response
+
+```
+Status: 201 Created
+```
+
+```json
+{
+    "id": 1,
+    "username": "user1",
+    "password": "password1"
+}
+```
+
+### List user
+
+```
+GET /api/v1/users/
+```
+
+#### Response
+
+```
+Status: 200 OK
+```
+
+```json
+[
+    {
+        "id": 1,
+        "username": "user1",
+        "password": "password1"
+    },
+    {
+        "id": 2,
+        "username": "user2",
+        "password": "password2"
+    }
+]
+```
+
+### Detail user
+
+```
+GET /api/v1/users/:id/
+```
+
+#### Response
+
+```
+Status: 200 OK
+```
+
+```json
+{
+    "id": 1,
+    "username": "user1",
+    "password": "password1"
 }
 ```
