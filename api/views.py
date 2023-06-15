@@ -12,6 +12,7 @@ def to_dict(task: Task) -> dict:
         "done": task.done,
         "created": task.created,
         "updated": task.updated,
+        "user": task.user.username,
     }
 
 
@@ -19,6 +20,7 @@ class TaskListView(View):
     def get(self, request:HttpRequest):
         tasks = Task.objects.all()
         return JsonResponse([to_dict(task) for task in tasks], safe=False, status=200)
+
     def post(self,request:HttpRequest):
         data_json = request.body.decode()
         data = json.loads(data_json)
@@ -71,7 +73,6 @@ class TaskIdView(View):
             return JsonResponse({'status': 'object does not exist!'})
 
         task.delete()
-
         return JsonResponse({'status': 'ok'},status=204)
         
 class TaskDoneView(View):
@@ -100,4 +101,9 @@ class TaskUndoneView(View):
 
         task.save()
 
+
         return JsonResponse(to_dict(task),status=200)
+
+        
+
+
